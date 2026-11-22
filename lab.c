@@ -5,9 +5,9 @@
 #define VK_ESCAPE_CODE 0x1B
 
 int main(void) {
-    setlocale(LC_ALL, "ru_RU.UTF-8");
+    SetConsoleOutputCP(CP_UTF8);
     
-    HANDLE stdInput = GetStdHandle(STD_INPUT_HANDLE); // stdInput - обработчик ввода с клавиатуры
+    HANDLE stdInput = GetStdHandle(STD_INPUT_HANDLE); // stdInput - обработчик ввода с клавиатуры (указатель на дескриптор)
     if (stdInput == INVALID_HANDLE_VALUE) {
         fprintf(stderr, "GetStdHandle failed: %lu\n", GetLastError());
         return 1;
@@ -15,13 +15,12 @@ int main(void) {
     
     printf("Нажмите клавишу на клавиатуре от 0 до 9 (Esc - выход)\n");
 
-    int first = -1;              // -1 == None
+    int first = -1;
     INPUT_RECORD record; // инициализация структуры для хранения нажатой клавиши
-    DWORD count; // 
+    DWORD count; // без него не работает
 
     while (ReadConsoleInputW(stdInput, &record, 1, &count)) {
-        // нам интересны только нажатия клавиш
-        if (record.EventType != KEY_EVENT || !record.Event.KeyEvent.bKeyDown)
+        if (record.EventType != KEY_EVENT || !record.Event.KeyEvent.bKeyDown) // нам интересны только нажатия клавиш
             continue;
 
         KEY_EVENT_RECORD *key = &record.Event.KeyEvent;
@@ -38,11 +37,9 @@ int main(void) {
         if (first < 0) {
             first = digit;
             printf("Первая цифра: %d\n", digit);
-            fflush(stdout); // освобождает поток вывода
         } else {
             printf("Вторая цифра: %d\n", digit);
             printf("%d + %d = %d\n", first, digit, first + digit);
-            fflush(stdout);
             first = -1;
         }
     }
